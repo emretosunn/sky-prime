@@ -27,13 +27,13 @@ const CITY_MAP = {
  * Travelpayouts üzerinden gerçek uçuş fırsatlarını çeker
  */
 export const fetchFlightDeals = async (origin = 'IST') => {
-    if (!API_TOKEN || API_TOKEN === 'YOUR_TOKEN') {
+    if (!API_TOKEN || API_TOKEN === 'YOUR_TOKEN' || API_TOKEN.includes('YOUR_')) {
         throw new Error('TOKEN_MISSING');
     }
 
     try {
         // /prices_for_dates endpoint'i en güncel ve ucuz fiyatları getirir
-        const response = await api.get('/prices_for_dates', {
+        const response = await api.get('prices_for_dates', {
             params: {
                 origin: origin,
                 currency: 'try',
