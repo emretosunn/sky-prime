@@ -1,0 +1,127 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: 'Plus Jakarta Sans', system-ui, sans-serif;
+
+  --color-background: #050505;
+  --color-surface: #0a0a0a;
+  --color-brand: #0070f3;
+  --color-brand-glow: rgba(0, 112, 243, 0.3);
+
+  --color-neon-blue: #00f3ff;
+  --color-neon-green: #00ff9d;
+  --color-neon-purple: #9d00ff;
+}
+
+@layer base {
+  body {
+    background-color: var(--color-background);
+    color: #ffffff;
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+
+  ::selection {
+    background: var(--color-brand);
+    color: white;
+  }
+}
+
+@layer utilities {
+  .noise-bg {
+    background-image: url("https://grainy-gradients.vercel.app/noise.svg");
+    /* Updated from instruction */
+    filter: contrast(120%) brightness(120%);
+    /* Updated from instruction */
+    opacity: 0.03;
+    /* Kept from original */
+  }
+
+  .premium-glass {
+    background: rgba(255, 255, 255, 0.03);
+    /* Updated from instruction */
+    backdrop-filter: blur(24px) saturate(180%);
+    /* Updated from instruction */
+    -webkit-backdrop-filter: blur(24px) saturate(180%);
+    /* Added from instruction */
+    border: 1px solid var(--premium-border);
+    /* Updated from instruction */
+  }
+
+  .premium-card {
+    background: linear-gradient(145deg, rgba(20, 20, 20, 0.9), rgba(5, 5, 5, 0.95));
+    /* Updated from instruction */
+    border: 1px solid var(--premium-border);
+    /* Updated from instruction */
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    /* Added from instruction */
+    transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+    /* Updated from instruction */
+  }
+
+  /* Added from instruction */
+  .premium-card:hover {
+    border-color: rgba(255, 255, 255, 0.15);
+    box-shadow: 0 40px 80px -15px rgba(0, 0, 0, 0.7);
+    transform: translateY(-8px);
+  }
+
+  .text-gradient {
+    background: linear-gradient(to bottom right, #fff 30%, rgba(255, 255, 255, 0.4) 100%);
+    /* Updated from instruction */
+    -webkit-background-clip: text;
+    /* Added from instruction */
+    -webkit-text-fill-color: transparent;
+    /* Added from instruction */
+  }
+
+  /* Removed .glow-cyan as per instruction */
+
+  /* Added from instruction */
+  .glow-price {
+    text-shadow: 0 0 20px rgba(0, 112, 242, 0.3);
+  }
+
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.2);
+  }
+
+  /* Added from instruction */
+  .mesh-glow {
+    background: radial-gradient(circle at 50% 50%, rgba(0, 112, 242, 0.15) 0%, transparent 60%);
+  }
+}
+
+/* Custom animations for framer-motion or standard CSS */
+@keyframes float {
+  0% {
+    transform: translateY(0px);
+  }
+
+  50% {
+    transform: translateY(-10px);
+  }
+
+  100% {
+    transform: translateY(0px);
+  }
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
