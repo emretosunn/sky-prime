@@ -1,0 +1,12 @@
+{
+    "rewrites": [
+        {
+            "source": "/api-travel/(.*)",
+            "destination": "https://api.travelpayouts.com/$1"
+        },
+        {
+            "source": "/(.*)",
+            "destination": "/index.html"
+        }
+    ]
+}
