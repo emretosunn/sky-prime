@@ -31,7 +31,7 @@ export default async function handler(req, res) {
 
   try {
     // Query parameters'ı al
-    const { origin = 'IST', currency = 'try', limit = '15' } = req.query;
+    const { origin = 'IST', destination, currency = 'try', limit = '30', departure_at, return_at } = req.query;
 
     // API URL'ini oluştur
     const params = new URLSearchParams({
@@ -43,6 +43,19 @@ export default async function handler(req, res) {
       limit,
       token: API_TOKEN
     });
+
+    // Varış noktası belirtilmişse ekle
+    if (destination) {
+      params.append('destination', destination);
+    }
+
+    // Tarih parametreleri
+    if (departure_at) {
+      params.append('departure_at', departure_at);
+    }
+    if (return_at) {
+      params.append('return_at', return_at);
+    }
 
     const apiUrl = `https://api.travelpayouts.com/aviasales/v3/prices_for_dates?${params.toString()}`;
 
