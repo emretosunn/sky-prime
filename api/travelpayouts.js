@@ -1,5 +1,5 @@
 // Vercel Serverless Function - Travelpayouts API Proxy
-// Bu fonksiyon CORS sorunlarını çözer ve API token'ını sunucu tarafında güvenli tutar
+// Node.js 18+ native fetch kullanılıyor
 
 export default async function handler(req, res) {
   // CORS headers
@@ -17,15 +17,14 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  // API Token - Vercel Dashboard'dan Environment Variables olarak eklenmeli
-  // NOT: VITE_ prefix'i olmadan sadece "TRAVELPAYOUTS_TOKEN" olarak ekleyin
-  const API_TOKEN = process.env.TRAVELPAYOUTS_TOKEN || process.env.VITE_TRAVELPAYOUTS_TOKEN;
+  // API Token
+  const API_TOKEN = process.env.TRAVELPAYOUTS_TOKEN;
 
   if (!API_TOKEN) {
-    console.error('API Token bulunamadı. Environment variables:', Object.keys(process.env).filter(k => k.includes('TRAVEL')));
+    console.error('TRAVELPAYOUTS_TOKEN bulunamadı');
     return res.status(500).json({ 
-      error: 'API token yapılandırılmamış',
-      hint: 'Vercel Dashboard > Settings > Environment Variables bölümünden TRAVELPAYOUTS_TOKEN ekleyin'
+      error: 'Sunucu yapılandırma hatası',
+      data: []
     });
   }
 
@@ -59,19 +58,20 @@ export default async function handler(req, res) {
 
     const apiUrl = `https://api.travelpayouts.com/aviasales/v3/prices_for_dates?${params.toString()}`;
 
+    console.log('API isteği gönderiliyor:', origin, '->', destination || 'tüm dünya');
+
     const response = await fetch(apiUrl, {
+      method: 'GET',
       headers: {
         'Accept': 'application/json'
       }
     });
 
     if (!response.ok) {
-      const errorText = await response.text();
-      console.error('Travelpayouts API Hatası:', response.status, errorText);
-      return res.status(response.status).json({ 
-        error: 'API isteği başarısız', 
-        status: response.status,
-        details: errorText 
+      console.error('API hatası:', response.status);
+      return res.status(200).json({ 
+        success: false,
+        data: []
       });
     }
 
@@ -82,10 +82,10 @@ export default async function handler(req, res) {
     
     return res.status(200).json(data);
   } catch (error) {
-    console.error('Travelpayouts Proxy Hatası:', error);
-    return res.status(500).json({ 
-      error: 'Sunucu hatası', 
-      details: error.message 
+    console.error('Sunucu hatası:', error.message);
+    return res.status(200).json({ 
+      success: false,
+      data: []
     });
   }
 }
