@@ -1,11 +1,13 @@
 import axios from 'axios';
 
-// Travelpayouts API Token - .env dosyasından çekilecek
+// Production'da Vercel Serverless Functions kullanılacak
+// Development'ta Vite proxy kullanılacak
+const isDev = import.meta.env.DEV;
 const API_TOKEN = import.meta.env.VITE_TRAVELPAYOUTS_TOKEN;
 
 const api = axios.create({
-    // Vite proxy'sini kullanıyoruz (CORS hatasını önlemek için)
-    baseURL: '/api-travel/aviasales/v3',
+    // Development: Vite proxy, Production: Vercel Serverless Functions
+    baseURL: isDev ? '/api-travel/aviasales/v3' : '/api',
 });
 
 /**
@@ -27,23 +29,31 @@ const CITY_MAP = {
  * Travelpayouts üzerinden gerçek uçuş fırsatlarını çeker
  */
 export const fetchFlightDeals = async (origin = 'IST') => {
-    if (!API_TOKEN || API_TOKEN === 'YOUR_TOKEN' || API_TOKEN.includes('YOUR_')) {
+    // Development'ta token kontrolü yap, production'da serverless function halleder
+    if (isDev && (!API_TOKEN || API_TOKEN === 'YOUR_TOKEN' || API_TOKEN.includes('YOUR_'))) {
         throw new Error('TOKEN_MISSING');
     }
 
     try {
-        // /prices_for_dates endpoint'i en güncel ve ucuz fiyatları getirir
-        const response = await api.get('prices_for_dates', {
-            params: {
-                origin: origin,
-                currency: 'try',
-                unique: 'true', // Her varış noktası için tek (en ucuz) fiyat
-                sorting: 'price',
-                direct: 'false',
-                limit: 15,
-                token: API_TOKEN
-            }
-        });
+        // Production'da farklı endpoint, development'ta farklı
+        const endpoint = isDev ? 'prices_for_dates' : 'travelpayouts';
+        
+        // Development'ta token ekle, production'da serverless function ekliyor
+        const params = {
+            origin: origin,
+            currency: 'try',
+            limit: 15
+        };
+
+        // Sadece development'ta token ekle (frontend'de görünür)
+        if (isDev) {
+            params.unique = 'true';
+            params.sorting = 'price';
+            params.direct = 'false';
+            params.token = API_TOKEN;
+        }
+
+        const response = await api.get(endpoint, { params });
 
         if (!response.data || !response.data.data) return [];
 
@@ -69,8 +79,8 @@ export const fetchFlightDeals = async (origin = 'IST') => {
                 flightNumber: deal.flight_number,
                 transfers: deal.transfers,
                 duration: durationStr,
-                discount: 0, // Mock veriyi kaldırıyoruz
-                oldPrice: null, // Mock veriyi kaldırıyoruz
+                discount: 0,
+                oldPrice: null,
                 tag: deal.price < 5000 ? 'UCUZ BİLET' : 'Popüler Rota',
                 link: `https://www.aviasales.com${deal.link}`
             };
@@ -78,6 +88,12 @@ export const fetchFlightDeals = async (origin = 'IST') => {
 
     } catch (error) {
         console.error('Travelpayouts API Hatası:', error);
+        
+        // Production'da serverless function'dan gelen hataları kontrol et
+        if (error.response?.data?.hint) {
+            console.error('Hint:', error.response.data.hint);
+        }
+        
         throw error;
     }
 };
