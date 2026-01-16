@@ -30,16 +30,25 @@ export default async function handler(req, res) {
 
   try {
     // Query parameters'ı al
-    const { origin = 'IST', destination, currency = 'try', limit = '30', departure_at, return_at } = req.query;
+    const { 
+      origin = 'IST', 
+      destination, 
+      currency = 'try', 
+      limit = '50',  // Daha fazla sonuç
+      departure_at, 
+      return_at,
+      one_way = 'false'  // Varsayılan: gidiş-dönüş
+    } = req.query;
 
     // API URL'ini oluştur
     const params = new URLSearchParams({
       origin,
       currency,
-      unique: 'true',
+      unique: 'false',  // Tüm fırsatları getir, unique olmasın
       sorting: 'price',
       direct: 'false',
       limit,
+      one_way,  // Gidiş-dönüş veya tek yön
       token: API_TOKEN
     });
 
@@ -58,7 +67,7 @@ export default async function handler(req, res) {
 
     const apiUrl = `https://api.travelpayouts.com/aviasales/v3/prices_for_dates?${params.toString()}`;
 
-    console.log('API isteği gönderiliyor:', origin, '->', destination || 'tüm dünya');
+    console.log('API isteği:', origin, '->', destination || 'tüm dünya');
 
     const response = await fetch(apiUrl, {
       method: 'GET',
@@ -77,8 +86,8 @@ export default async function handler(req, res) {
 
     const data = await response.json();
 
-    // Cache header ekle (5 dakika)
-    res.setHeader('Cache-Control', 's-maxage=300, stale-while-revalidate');
+    // Cache header ekle (3 dakika - daha güncel fiyatlar için)
+    res.setHeader('Cache-Control', 's-maxage=180, stale-while-revalidate');
     
     return res.status(200).json(data);
   } catch (error) {

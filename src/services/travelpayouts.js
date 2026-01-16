@@ -409,11 +409,12 @@ export const fetchFlightDeals = async (origin = 'IST', destination = '', departu
         // Production'da farklı endpoint, development'ta farklı
         const endpoint = isDev ? 'prices_for_dates' : 'travelpayouts';
         
-        // Development'ta token ekle, production'da serverless function ekliyor
+        // API parametreleri
         const params = {
-                origin: origin,
-                currency: 'try',
-            limit: 30
+            origin: origin,
+            currency: 'try',
+            limit: 50,  // Daha fazla sonuç
+            one_way: 'false'  // Gidiş-dönüş fiyatları
         };
 
         // Varış noktası belirtilmişse ekle
@@ -429,9 +430,9 @@ export const fetchFlightDeals = async (origin = 'IST', destination = '', departu
             params.return_at = returnDate;
         }
 
-        // Sadece development'ta token ekle (frontend'de görünür)
+        // Sadece development'ta token ve ek parametreler ekle
         if (isDev) {
-            params.unique = 'true';
+            params.unique = 'false';  // Tüm fırsatları getir
             params.sorting = 'price';
             params.direct = 'false';
             params.token = API_TOKEN;
